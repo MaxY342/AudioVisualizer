@@ -30,7 +30,6 @@ window = pyglet.window.Window(width=800, height=600, caption='Audio Visualizer')
 batch = pyglet.graphics.Batch()
 
 # FFT data storage
-fft_magnitude = np.zeros(CHUNK // 2)
 fft_bars = []  # Stores Rectangle objects for FFT bars
 
 # Create FFT bars (pre-initialize)
