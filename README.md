@@ -1,1 +1,1 @@
-# AudioVisualizer
+# simple barred audio visualizer using pyaudio to get audio data (needs stereo mix to be enabled) and pyglet to display it
