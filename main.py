@@ -53,8 +53,12 @@ def update(dt):
     mono_audio_data = ((left + right) / 2).astype(np.float32) / 32768.0
     mono_audio_data_padded = np.zeros(CHUNK, dtype=np.float32)
     mono_audio_data_padded[:len(mono_audio_data)] = mono_audio_data
+    # apply Hanning window
+    window = np.hanning(len(mono_audio_data_padded))
+    mono_audio_data_padded *= window
     # compute the FFT
     fft = np.abs(np.fft.rfft(mono_audio_data_padded)[:CHUNK//2]) / CHUNK
+    fft *= np.logspace(-1.5, 1.5, CHUNK//2, base=2)
     fft_magnitude = np.clip(fft * 50, 0, 1)
 
     # Update FFT bars
