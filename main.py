@@ -34,8 +34,8 @@ fft_bars = []  # Stores Rectangle objects for FFT bars
 smooth_fft = np.zeros(CHUNK // 2)
 
 # Create FFT bars (pre-initialize)
-bar_width = 800 / (CHUNK // 2)
-for i in range(CHUNK // 2):
+bar_width = 800 / ((CHUNK // 2) // 2)
+for i in range((CHUNK // 2) // 2):
     bar = shapes.Rectangle(
         x=i * bar_width,
         y=0,
@@ -57,20 +57,22 @@ def update(dt):
     mono_audio_data_padded = np.zeros(CHUNK, dtype=np.float32)
     mono_audio_data_padded[:len(mono_audio_data)] = mono_audio_data
 
-    # apply Hanning window
+    # Apply Hanning window
     window = np.hanning(len(mono_audio_data_padded))
     mono_audio_data_padded *= window
 
-    # compute the FFT
+    # Compute the FFT
     fft = np.abs(np.fft.rfft(mono_audio_data_padded)[:CHUNK//2]) / CHUNK
     fft *= np.logspace(-1.5, 1.5, CHUNK//2, base=2)
     fft_magnitude = np.clip(fft * 50, 0, 1)
 
+    # Smooth the FFT data
     smooth_fft = 0.7 * smooth_fft + 0.3 * fft_magnitude
     fft_magnitude = smooth_fft
+    bin_average = np.mean(fft_magnitude.reshape(-1, 2), axis=1)
 
     # Update FFT bars
-    for i, mag in enumerate(fft_magnitude):
+    for i, mag in enumerate(bin_average):
         fft_bars[i].height = mag * 600  # Scale height to window
 
 @window.event
