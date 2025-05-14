@@ -64,7 +64,7 @@ def update(dt):
     # Compute the FFT
     fft = np.abs(np.fft.rfft(mono_audio_data_padded)[:CHUNK//2]) / CHUNK
     fft *= np.logspace(-1.5, 1.5, CHUNK//2, base=2)
-    fft_magnitude = np.clip(fft * 50, 0, 1)
+    fft_magnitude = np.clip(fft * 100, 0, 1)
 
     # Smooth the FFT data
     smooth_fft = 0.7 * smooth_fft + 0.3 * fft_magnitude
