@@ -30,12 +30,13 @@ window = pyglet.window.Window(width=800, height=600, caption='Audio Visualizer')
 batch = pyglet.graphics.Batch()
 
 # How many log-spaced bars
-NUM_BARS = 60  
+NUM_BARS = 32  
 
 # Frequency mapping for each bar
 freqs = np.fft.rfftfreq(CHUNK, 1.0 / RATE)  # FFT bin frequencies (ranging from 0 to RATE/2)
 # Define log-spaced targets freqencies (bar centers)
-log_freqs = np.logspace(np.log10(40), np.log10(RATE/2), NUM_BARS)
+log_freqs = np.logspace(np.log10(20), np.log10(RATE/2), NUM_BARS)
+print("Log frequencies:", log_freqs)
 
 # FFT data storage
 fft_bars = []  # Stores Rectangle objects for FFT bars
@@ -77,7 +78,7 @@ def update(dt):
     log_fft = np.clip(log_fft*50, 0, 1)
 
     # Smooth the FFT data
-    smooth_fft = 0.7 * smooth_fft + 0.3 * log_fft
+    smooth_fft = 0.8 * smooth_fft + 0.2 * log_fft
 
     # Update FFT bars
     for i, mag in enumerate(smooth_fft):
