@@ -29,13 +29,21 @@ stream = p.open(
 window = pyglet.window.Window(width=800, height=600, caption='Audio Visualizer')
 batch = pyglet.graphics.Batch()
 
+# How many log-spaced bars
+NUM_BARS = 60  
+
+# Frequency mapping for each bar
+freqs = np.fft.rfftfreq(CHUNK, 1.0 / RATE)  # FFT bin frequencies (ranging from 0 to RATE/2)
+# Define log-spaced targets freqencies (bar centers)
+log_freqs = np.logspace(np.log10(40), np.log10(RATE/2), NUM_BARS)
+
 # FFT data storage
 fft_bars = []  # Stores Rectangle objects for FFT bars
-smooth_fft = np.zeros(CHUNK // 2)
+smooth_fft = np.zeros(NUM_BARS)
 
 # Create FFT bars (pre-initialize)
-bar_width = 800 / ((CHUNK // 2) // 2)
-for i in range((CHUNK // 2) // 2):
+bar_width = 800 / NUM_BARS
+for i in range(NUM_BARS):
     bar = shapes.Rectangle(
         x=i * bar_width,
         y=0,
@@ -54,25 +62,25 @@ def update(dt):
     left = data[::2]
     right = data[1::2]
     mono_audio_data = ((left + right) / 2).astype(np.float32) / 32768.0
-    mono_audio_data_padded = np.zeros(CHUNK, dtype=np.float32)
-    mono_audio_data_padded[:len(mono_audio_data)] = mono_audio_data
 
     # Apply Hanning window
-    window = np.hanning(len(mono_audio_data_padded))
-    mono_audio_data_padded *= window
+    window = np.hanning(len(mono_audio_data))
+    mono_audio_data *= window
 
     # Compute the FFT
-    fft = np.abs(np.fft.rfft(mono_audio_data_padded)[:CHUNK//2]) / CHUNK
-    fft *= np.logspace(-1.5, 1.5, CHUNK//2, base=2)
-    fft_magnitude = np.clip(fft * 100, 0, 1)
+    fft = np.abs(np.fft.rfft(mono_audio_data)) / CHUNK
+
+    # Interpolate FFT magnitudes at log-spaced frequencies
+    log_fft = np.interp(log_freqs, freqs, fft)
+
+    # Normalize the FFT data
+    log_fft = np.clip(log_fft*50, 0, 1)
 
     # Smooth the FFT data
-    smooth_fft = 0.7 * smooth_fft + 0.3 * fft_magnitude
-    fft_magnitude = smooth_fft
-    bin_average = np.mean(fft_magnitude.reshape(-1, 2), axis=1)
+    smooth_fft = 0.7 * smooth_fft + 0.3 * log_fft
 
     # Update FFT bars
-    for i, mag in enumerate(bin_average):
+    for i, mag in enumerate(smooth_fft):
         fft_bars[i].height = mag * 600  # Scale height to window
 
 @window.event
