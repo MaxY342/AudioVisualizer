@@ -35,8 +35,8 @@ batch = pyglet.graphics.Batch()
 NUM_BARS = 32  
 
 # Frequency mapping for each bar
-freqs = np.fft.rfftfreq(CHUNK, 1.0 / RATE)  # FFT bin frequencies (ranging from 0 to RATE/2)
-# Define log-spaced targets freqencies (bar centers)
+freqs = np.fft.rfftfreq(CHUNK, 1.0 / RATE)  # x-axis, linear FFT bin frequencies (ranging from 0 to RATE/2)
+# new x-axis, Define log-spaced targets freqencies (bar centers)
 start_freq = 150  # Start frequency for visualization
 end_freq = 10000  # End frequency for visualization
 log_freqs = np.logspace(np.log10(start_freq), np.log10(end_freq), NUM_BARS)
@@ -73,9 +73,9 @@ def update(dt):
     mono_audio_data *= window
 
     # Compute the FFT
-    fft = np.abs(np.fft.rfft(mono_audio_data)) / CHUNK
+    fft = np.abs(np.fft.rfft(mono_audio_data)) / CHUNK # y-axis, FFT magnitudes
 
-    # Interpolate FFT magnitudes at log-spaced frequencies
+    # Interpolate FFT magnitudes (linear spaced y-axis values) from linear freq bins (linear spaced x-axis values) to log-spaced freq bins (log spaced x-axis values)
     log_fft = np.interp(log_freqs, freqs, fft)
 
     # Balance lower and higher frequencies
