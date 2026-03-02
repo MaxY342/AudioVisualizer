@@ -85,7 +85,7 @@ def update(dt):
     log_fft = np.clip(log_fft*40, 0, 1)
 
     # Smooth the FFT data
-    smooth_fft = 0.8 * smooth_fft + 0.2 * log_fft
+    smooth_fft = 0.7 * smooth_fft + 0.3 * log_fft
 
     # Update FFT bars
     for i, mag in enumerate(smooth_fft):
